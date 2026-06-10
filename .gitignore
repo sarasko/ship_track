@@ -1,0 +1,46 @@
+# Environment variables — never commit real tokens or passwords
+.env
+.env.local
+.env.*.local
+
+# Keep the example files
+!.env.example
+
+# Node
+node_modules/
+dist/
+build/
+.npm/
+
+# Yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker volumes (if ever dumped locally)
+.docker/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+
+# Test coverage
+coverage/

@@ -1,0 +1,32 @@
+# docker-compose.override.yml
+# Docker Compose loads this automatically alongside docker-compose.yml in local dev.
+# Do NOT commit secrets here. This file is safe to commit — it only adds dev tooling.
+
+services:
+
+  order-service:
+    command: >
+      sh -c "yarn global add nodemon 2>/dev/null;
+             nodemon --watch src --ext ts,js,json
+             --exec 'node --loader ts-node/esm src/index.ts'
+             || tail -f /dev/null"
+
+  inventory-service:
+    command: >
+      sh -c "yarn global add nodemon 2>/dev/null;
+             nodemon --watch src --ext ts,js,json
+             --exec 'node --loader ts-node/esm src/index.ts'
+             || tail -f /dev/null"
+
+  notification-service:
+    command: >
+      sh -c "yarn global add nodemon 2>/dev/null;
+             nodemon --watch src --ext ts,js,json
+             --exec 'node --loader ts-node/esm src/index.ts'
+             || tail -f /dev/null"
+
+  frontend:
+    command: >
+      sh -c "yarn 2>/dev/null;
+             yarn vite --host 0.0.0.0 --port 5173
+             || tail -f /dev/null"

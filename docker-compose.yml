@@ -1,0 +1,190 @@
+services:
+
+  # ── Infrastructure ──────────────────────────────────────────────────────────
+
+  postgres:
+    container_name: ST_Postgres
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - st_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ds-net
+
+  mongo:
+    container_name: ST_Mongo
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    volumes:
+      - st_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - ds-net
+
+  localstack:
+    container_name: ST_LocalStack
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: sns,sqs,s3
+      AWS_DEFAULT_REGION: ${AWS_REGION}
+      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN:-}   # optional — needed for LocalStack Pro only
+    volumes:
+      - ./scripts/localstack-init.sh:/etc/localstack/init/ready.d/init.sh
+      - st_localstack_data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    networks:
+      - ds-net
+
+  # ── Services ────────────────────────────────────────────────────────────────
+
+  order-service:
+    container_name: ST_Order_Service
+    build: ./services/order-service
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./services/order-service:/app
+      - /app/node_modules
+      - /run/user/1000/ssh-agent.socket:/root/.ssh/ssh_auth_sock
+    environment:
+      - SSH_AUTH_SOCK=/root/.ssh/ssh_auth_sock
+      - NODE_ENV=${NODE_ENV}
+      - PORT=3001
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - MONGO_URL=mongodb://${MONGO_USER}:${MONGO_PASSWORD}@mongo:27017/${MONGO_DB}?authSource=admin
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - SNS_TOPIC_ARN=${SNS_TOPIC_ARN}
+      - SQS_ORDER_QUEUE_URL=${SQS_ORDER_QUEUE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    networks:
+      - ds-net
+
+  inventory-service:
+    container_name: ST_Inventory_Service
+    build: ./services/inventory-service
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./services/inventory-service:/app
+      - /app/node_modules
+      - /run/user/1000/ssh-agent.socket:/root/.ssh/ssh_auth_sock
+    environment:
+      - SSH_AUTH_SOCK=/root/.ssh/ssh_auth_sock
+      - NODE_ENV=${NODE_ENV}
+      - PORT=3002
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - SNS_TOPIC_ARN=${SNS_TOPIC_ARN}
+      - SQS_INVENTORY_QUEUE_URL=${SQS_INVENTORY_QUEUE_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    networks:
+      - ds-net
+
+  notification-service:
+    container_name: ST_Notification_Service
+    build: ./services/notification-service
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./services/notification-service:/app
+      - /app/node_modules
+      - /run/user/1000/ssh-agent.socket:/root/.ssh/ssh_auth_sock
+    environment:
+      - SSH_AUTH_SOCK=/root/.ssh/ssh_auth_sock
+      - NODE_ENV=${NODE_ENV}
+      - PORT=3003
+      - AWS_ENDPOINT_URL=${AWS_ENDPOINT_URL}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - SQS_NOTIFICATION_QUEUE_URL=${SQS_NOTIFICATION_QUEUE_URL}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=${EMAIL_FROM}
+    depends_on:
+      localstack:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    networks:
+      - ds-net
+
+  frontend:
+    container_name: ST_Frontend
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /run/user/1000/ssh-agent.socket:/root/.ssh/ssh_auth_sock
+    environment:
+      - SSH_AUTH_SOCK=/root/.ssh/ssh_auth_sock
+      - NODE_ENV=${NODE_ENV}
+      - VITE_API_URL=${VITE_API_URL}
+    stdin_open: true
+    tty: true
+    networks:
+      - ds-net
+
+# ── Volumes ──────────────────────────────────────────────────────────────────
+
+volumes:
+  st_pg_data:
+  st_mongo_data:
+  st_localstack_data:
+
+# ── Networks ─────────────────────────────────────────────────────────────────
+
+networks:
+  ds-net:
+    external: true
