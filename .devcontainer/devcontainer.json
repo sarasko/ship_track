@@ -1,22 +1,18 @@
 {
   "name": "ShipTrack",
-
   // Use the existing docker-compose setup — don't create a separate container
-  "dockerComposeFile": ["../docker-compose.yml"],
-
+  "dockerComposeFile": [
+    "../docker-compose.yml"
+  ],
   // Which container VS Code attaches to by default
   // Change to "inventory-service" or "notification-service" when working on those
   "service": "order-service",
-
   // Where VS Code opens inside the container
   "workspaceFolder": "/app",
-
   // Keep all other containers running when you close VS Code
   "shutdownAction": "none",
-
   // Run after container starts
   "postStartCommand": "yarn install",
-
   // Extensions installed INSIDE the container
   "customizations": {
     "vscode": {
@@ -26,36 +22,30 @@
         "esbenp.prettier-vscode",
         "ms-vscode.vscode-typescript-next",
         "christian-kohler.npm-intellisense",
-
         // Docker (useful even from inside a container)
         "ms-azuretools.vscode-docker",
-
         // Database clients
         "cweijan.vscode-postgresql-client2",
         "mongodb.mongodb-vscode",
-
         // AWS
         "amazonwebservices.aws-toolkit-vscode",
-
         // Git
         "eamodio.gitlens",
         "mhutchie.git-graph",
-
         // REST client (test your endpoints without Postman)
         "humao.rest-client",
-
         // Utilities
         "mikestead.dotenv",
         "streetsidesoftware.code-spell-checker",
         "usernamehw.errorlens",
-        "christian-kohler.path-intellisense"
+        "christian-kohler.path-intellisense",
+        // AI assistants
+        "anthropic.claude-code"
       ],
-
       "settings": {
         // Use the container's Node/npm, not the host's
         "npm.packageManager": "yarn",
         "node.defaultVersion": "24",
-
         // Format on save
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -65,31 +55,37 @@
         "[javascript]": {
           "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
-
         // ESLint
-        "eslint.validate": ["javascript", "typescript"],
+        "eslint.validate": [
+          "javascript",
+          "typescript"
+        ],
         "editor.codeActionsOnSave": {
           "source.fixAll.eslint": "explicit"
         },
-
         // Terminal opens inside the container
         "terminal.integrated.defaultProfile.linux": "bash",
-
         // Show full file path in tab
         "workbench.editor.labelFormat": "short",
-
         // Git inside container uses your host SSH agent
         "git.autofetch": true
       }
     }
   },
-
   // Environment variables available inside VS Code's terminal
   "remoteEnv": {
     "SSH_AUTH_SOCK": "/root/.ssh/ssh_auth_sock"
   },
-
   // Ports to forward to your host automatically
   // You can then open http://localhost:3001 on your host
-  "forwardPorts": [3001, 3002, 3003, 5173, 5432, 27017, 4566, 9324]
+  "forwardPorts": [
+    3001,
+    3002,
+    3003,
+    5173,
+    5432,
+    27017,
+    4566,
+    9324
+  ]
 }

@@ -1,0 +1,15 @@
+{
+  "name": "shiptrack",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:order": "yarn workspace order-service dev",
+    "dev:inventory": "yarn workspace inventory-service dev",
+    "dev:notification": "yarn workspace notification-service dev",
+    "typecheck": "yarn workspaces foreach run typecheck",
+    "build": "yarn workspaces foreach run build"
+  }
+}
