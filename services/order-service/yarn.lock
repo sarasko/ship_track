@@ -222,17 +222,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"app@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "app@workspace:."
-  dependencies:
-    "@types/node": "npm:^25.9.2"
-    nodemon: "npm:^3.1.14"
-    tsx: "npm:^4.22.4"
-    typescript: "npm:^6.0.3"
-  languageName: unknown
-  linkType: soft
-
 "balanced-match@npm:^4.0.2":
   version: 4.0.4
   resolution: "balanced-match@npm:4.0.4"
@@ -604,6 +593,17 @@ __metadata:
   checksum: 10c0/e008c8142bcc335b5e38cf0d63cfd39d6cf2d97480af9abdbe9a439221fd4d749763bab492a8ee708ce7a194bb00c9da6d0a115018672310850489137b3da046
   languageName: node
   linkType: hard
+
+"order-service@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "order-service@workspace:."
+  dependencies:
+    "@types/node": "npm:^25.9.2"
+    nodemon: "npm:^3.1.14"
+    tsx: "npm:^4.22.4"
+    typescript: "npm:^6.0.3"
+  languageName: unknown
+  linkType: soft
 
 "picomatch@npm:^2.0.4, picomatch@npm:^2.2.1":
   version: 2.3.2
