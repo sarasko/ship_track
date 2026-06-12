@@ -2,15 +2,23 @@
   "name": "order-service",
   "packageManager": "yarn@4.14.1",
   "devDependencies": {
+    "@types/mongoose": "^5.11.97",
     "@types/node": "^25.9.2",
+    "@types/pg": "^8",
+    "node-pg-migrate": "^8.0.4",
     "nodemon": "^3.1.14",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   },
   "scripts": {
     "dev": "nodemon --watch src --ext ts,js,json --exec 'tsx src/index.ts'",
+    "migrate": "node-pg-migrate -j ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "mongoose": "^9.7.0",
+    "pg": "^8.21.0"
   }
 }
