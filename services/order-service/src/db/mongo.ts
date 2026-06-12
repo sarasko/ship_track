@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
 
-const { MONGO_USER, MONGO_PASSWORD, MONGO_DB, MONGO_HOST } = process.env;
-const uri = `mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}/${MONGO_DB}`;
-
+const uri = process.env.MONGO_URL || 'changeMe';
+console.log(uri);
 connect().catch((err) => console.log(err));
 
 export async function connect() {
   await mongoose.connect(uri);
+}
+
+export async function disconnect() {
+  await mongoose.disconnect();
 }
